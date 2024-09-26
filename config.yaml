@@ -1,0 +1,45 @@
+# In this file, the user can define multiple parameters for detecting, fitting and analyzing peaks in a dQdV curve.
+# The defaault values are values that were found to work for different datasets. However, the user can change any of the
+# parameters to better suit their needs.
+
+
+# Define potential bounds for peak extraction. The peak detection and fitting will be done only in peaks found in
+# this range. Values in V.
+lower_potential_bound: 4.1
+upper_potential_bound: 4.27
+
+# Define the range od dQdV values to analyse. Values > 0 dqdV correspond to charge. Values < 0 correspond to
+# discharge
+amplitude_bound_value: 0.0
+
+# Thresholds for the fit
+normalized_SSE_threshold: 0.1
+
+# Define bounds for peak width fitting
+width_lower_bound: 0.0
+width_upper_bound: 0.1
+
+# dQdV cutoff value for weights. This value divides the data in two sections that will be given different weight in the
+# fitting. Currently, the cutoff value is 0.5, which means that the data will be divided at 50% the maximum value.
+weight_cutoff_value: 0.5
+
+# # Define the inital guess values for the peak fitting. The initial guess values are:
+# 1. The amplitude of the peak is 99% of the maximum value of the dQdV curve.
+amplitude_initial_guess_percentage: 0.99
+
+# 2. The width of the peak is 0.001 V.  
+width_initial_guess: 0.001
+
+# Bounds for the peak center relative to the initial guess. The peak center will be fitted between 99% and 101% of the initial guess.
+peak_center_lower_bound_percentage: 0.99
+peak_center_upper_bound_percentage: 1.01
+
+# Lower weight value for the data below the cutoff value. This value is used to give lower weight to the data below the cutoff value.
+# The higher the value, the more weight is given to the data below the cutoff value.
+lower_weight_value : 0.1
+
+# Parameters for the fitting algorithm
+max_iter: 20000
+max_eval: 10000
+xtol: 1.0e-20
+ftol: 1.0e-20

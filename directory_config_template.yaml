@@ -1,0 +1,5 @@
+directories:
+  base_directory: "/path/to/your/root/directory"
+  output_plots_directory: "/path/to/your/output/plots/directory"
+  output_fitting_results_directory: "/path/to/your/output/fitting/results/directory"
+
