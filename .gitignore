@@ -1,0 +1,35 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+*.egg-info/
+.eggs/
+
+# PyCharm specific files
+.idea/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# macOS files
+.DS_Store
+
+# Ignoring specific folders
+_pycache_/
+Data/
+logs/
+not_necessary_code/
+Papers/
+Plots/
+Presentations/
