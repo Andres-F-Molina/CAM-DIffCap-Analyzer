@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Directory files
+directory_config.yaml
+
 # Virtual environment
 venv/
 
@@ -33,3 +36,4 @@ not_necessary_code/
 Papers/
 Plots/
 Presentations/
+fitting_results/
