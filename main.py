@@ -111,7 +111,7 @@ for file in mpr_files:
             'cell': cell,
             'amplitude': parameters[0],
             'center': parameters[1],
-            'width': parameters[2],
+            #'width': parameters[2],
             'fwhm': fwhm,
             'area': area,
             'SSE': normalized_SSE

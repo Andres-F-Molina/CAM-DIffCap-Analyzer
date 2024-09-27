@@ -26,10 +26,6 @@ def weighted_objective_function(params, x, y, weights):
     amplitude, center, sigma, gamma = params
     return np.sum(weights * (voigt(x, amplitude, center, sigma, gamma) - y) ** 2)
 
-# Modify the objective function to include weights
-#def weighted_objective_function(params, x, y, weights):
- #   return np.sum(weights * (gaussian(x, *params) - y) ** 2)
-
 # Function to normalize SSE
 def normalize_sse(sse, y):
     return sse / np.sum(y ** 2)
@@ -106,86 +102,15 @@ def fit_peak(dQdV_charge, peak_value, peak_mid_voltage, config):
     y_fit_optimized = voigt(x_fit, *parameters)
 
     # Calculate FWHM and area for the Voigt profile
-    fwhm = 2 * np.sqrt(2 * np.log(2)) * parameters[2]  # Approximation for FWHM of the Voigt profile
-    area = parameters[0] * parameters[2] * np.sqrt(2 * np.pi)  # Area under the Voigt profile (approximate)
+    #fwhm = 2 * np.sqrt(2 * np.log(2)) * parameters[2]  # Approximation for FWHM of the Voigt profile
+    #area = parameters[0] * parameters[2] * np.sqrt(2 * np.pi)  # Area under the Voigt profile (approximate)
+    # Calculate FWHM and area for the Voigt profile
+    fwhm = 0.5346 * 2 * parameters[3] + np.sqrt(0.2166 * (2 * parameters[3]) ** 2 + (2.355 * parameters[2]) ** 2)
+    area = parameters[0] * (parameters[2] * np.sqrt(2 * np.pi) + 2 * parameters[3])
 
     logging.debug(f"PEAK FITTING. Peak fitted successfully.")
     return parameters, fwhm, area, normalized_SSE, x_fit, y_fit_optimized
 
-# def fit_peak(dQdV_charge, peak_value, peak_mid_voltage, config):
-#     """
-#     Fits a Gaussian to the detected peak.
-#     Returns fitted parameters, FWHM, area, and normalized SSE.
-#     """
-#     logging.debug(f"PEAK FITTING. Fitting peak.")
-#     # Initial guess
-#     initial_guess = np.array([
-#         peak_value * config['amplitude_initial_guess_percentage'],
-#         peak_mid_voltage,
-#         config['width_initial_guess']
-#     ])
-#
-#     # Bounds
-#     lower_bound_center = peak_mid_voltage * config['peak_center_lower_bound_percentage']
-#     upper_bound_center = peak_mid_voltage * config['peak_center_upper_bound_percentage']
-#
-#     bounds = [
-#         (None, np.max(dQdV_charge['filtered_dQ/dV'])),  # Amplitude
-#         (lower_bound_center, upper_bound_center),     # Center
-#         (config['width_lower_bound'], config['width_upper_bound'])  # Width
-#     ]
-#
-#     # Weights
-#     min_value = dQdV_charge['filtered_dQ/dV'].min()
-#     peak_max_value = dQdV_charge['filtered_dQ/dV'].max()
-#     cutoff_value = min_value + config['weight_cutoff_value'] * (peak_max_value - min_value)
-#     weights = np.ones_like(dQdV_charge['filtered_dQ/dV'].values)
-#     weights[dQdV_charge['filtered_dQ/dV'] < cutoff_value] = config['lower_weight_value']
-#
-#     # Fit
-#     result = minimize(
-#         weighted_objective_function,
-#         initial_guess,
-#         args=(
-#             dQdV_charge['mid_voltage'],
-#             dQdV_charge['filtered_dQ/dV'] - dQdV_charge['filtered_dQ/dV'].iloc[-1],
-#             weights
-#         ),
-#         method='Powell',
-#         bounds=bounds,
-#         options={
-#             'maxiter': config['max_iter'],
-#             'maxfev': config['max_eval'],
-#             'xtol': config['xtol'],
-#             'ftol': config['ftol'],
-#             'disp': False
-#         }
-#     )
-#
-#     if not result.success:
-#         logging.error(f"PEAK FITTING. Fit did not converge: {result.message}")
-#         raise RuntimeError(f"Fit did not converge: {result.message}")
-#
-#     current_SSE = result.fun
-#     normalized_SSE = normalize_sse(current_SSE, dQdV_charge['filtered_dQ/dV'].values)
-#     if normalized_SSE > config['normalized_SSE_threshold']:
-#         logging.error(f"PEAK FITTING. SSE too large {normalized_SSE}")
-#         raise ValueError(f"SSE too large: {normalized_SSE}")
-#
-#     parameters = result.x
-#     x_fit = np.linspace(
-#         np.min(dQdV_charge['mid_voltage']),
-#         np.max(dQdV_charge['mid_voltage']),
-#         500
-#     )
-#     y_fit_optimized = gaussian(x_fit, *parameters)
-#
-#     # Calculate FWHM and area
-#     fwhm = 2 * np.sqrt(2 * np.log(2)) * parameters[2]
-#     area = parameters[0] * parameters[2] * np.sqrt(2 * np.pi)
-#
-#     logging.debug(f"PEAK FITTING. Peak fitted successfully.")
-#     return parameters, fwhm, area, normalized_SSE, x_fit, y_fit_optimized
 
 def find_peaks(dQdV_charge):
     """
@@ -219,11 +144,6 @@ def process_fitting_results(fitting_results_dict, export_dir, sample_id):
     try:
         logging.debug(f"PEAK FITTING. Processing fitting results.")
 
-        # Ask the user if they want to summarize the results
-        #summarize = input("Do you want to summarize the fitting results? (Y/N): ").strip().upper()
-        #if summarize != 'Y':
-        #    print("Summary skipped.")
-        #    return
 
         summary_results = []
 
@@ -235,8 +155,8 @@ def process_fitting_results(fitting_results_dict, export_dir, sample_id):
             std_amplitude = df_results['amplitude'].std()
             avg_center = df_results['center'].mean()
             std_center = df_results['center'].std()
-            avg_width = df_results['width'].mean()
-            std_width = df_results['width'].std()
+            #avg_width = df_results['width'].mean()
+            #std_width = df_results['width'].std()
             avg_fwhm = df_results['fwhm'].mean()
             std_fwhm = df_results['fwhm'].std()
             avg_area = df_results['area'].mean()
@@ -254,8 +174,8 @@ def process_fitting_results(fitting_results_dict, export_dir, sample_id):
                 'std_amplitude': std_amplitude,
                 'avg_center': avg_center,
                 'std_center': std_center,
-                'avg_width': avg_width,
-                'std_width': std_width,
+                #'avg_width': avg_width,
+                #'std_width': std_width,
                 'avg_fwhm': avg_fwhm,
                 'std_fwhm': std_fwhm,
                 'avg_area': avg_area,
