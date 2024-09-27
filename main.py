@@ -123,8 +123,10 @@ for file in mpr_files:
         plot_dqdv_peak_fitting(file_stem,
                                 x_fit,
                                 y_fit,
-                                dQdV_curve['mid_voltage'],
-                                dQdV_curve['filtered_dQ/dV'])
+                                #dQdV_curve['mid_voltage'],
+                                charge_high_voltage_data['mid_voltage'],
+                                charge_high_voltage_data['filtered_dQ/dV']    )
+                                #dQdV_curve['filtered_dQ/dV'])
     except Exception as e:
         logging.error(f"MAIN. An error occurred while processing file {file_name}: {e}")
         continue  # Skip to the next file
