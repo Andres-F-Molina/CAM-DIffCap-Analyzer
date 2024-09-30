@@ -5,10 +5,6 @@ import logging
 from scipy.special import voigt_profile
 
 
-# Define Gaussian function for fitting
-def gaussian(x, amplitude, center, width):
-    return amplitude * np.exp(-((x - center) ** 2) / (2 * width ** 2))
-
 # Define Voigt function for fitting
 def voigt(x, amplitude, center, sigma, gamma):
     """
@@ -102,9 +98,6 @@ def fit_peak(dQdV_charge, peak_value, peak_mid_voltage, config):
     y_fit_optimized = voigt(x_fit, *parameters)
 
     # Calculate FWHM and area for the Voigt profile
-    #fwhm = 2 * np.sqrt(2 * np.log(2)) * parameters[2]  # Approximation for FWHM of the Voigt profile
-    #area = parameters[0] * parameters[2] * np.sqrt(2 * np.pi)  # Area under the Voigt profile (approximate)
-    # Calculate FWHM and area for the Voigt profile
     fwhm = 0.5346 * 2 * parameters[3] + np.sqrt(0.2166 * (2 * parameters[3]) ** 2 + (2.355 * parameters[2]) ** 2)
     area = parameters[0] * (parameters[2] * np.sqrt(2 * np.pi) + 2 * parameters[3])
 
@@ -130,7 +123,7 @@ def find_peaks(dQdV_charge):
 
     # Detect where the sign goes from +1 to -1 (indicating a peak)
     peaks = np.where((sign_change[:-1] > 0) & (sign_change[1:] < 0))[0]
-    peak_values = dQdV_charge['filtered_dQ/dV'].iloc[peaks].values
+    #peak_values = dQdV_charge['filtered_dQ/dV'].iloc[peaks].values
 
     # Find the maximum value of 'filtered_dQ/dV' and its index
     max_peak_index = dQdV_charge['filtered_dQ/dV'].idxmax()
@@ -155,8 +148,6 @@ def process_fitting_results(fitting_results_dict, export_dir, sample_id):
             std_amplitude = df_results['amplitude'].std()
             avg_center = df_results['center'].mean()
             std_center = df_results['center'].std()
-            #avg_width = df_results['width'].mean()
-            #std_width = df_results['width'].std()
             avg_fwhm = df_results['fwhm'].mean()
             std_fwhm = df_results['fwhm'].std()
             avg_area = df_results['area'].mean()
@@ -174,8 +165,6 @@ def process_fitting_results(fitting_results_dict, export_dir, sample_id):
                 'std_amplitude': std_amplitude,
                 'avg_center': avg_center,
                 'std_center': std_center,
-                #'avg_width': avg_width,
-                #'std_width': std_width,
                 'avg_fwhm': avg_fwhm,
                 'std_fwhm': std_fwhm,
                 'avg_area': avg_area,
