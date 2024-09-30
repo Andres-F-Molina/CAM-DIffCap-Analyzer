@@ -12,7 +12,7 @@ def plot_dqdv_peak_fitting(file_stem, x_fit, y_fit, x_original, y_original):
         x=x_fit,
         y=y_fit,
         mode='lines',
-        name='Fitted Gaussian Curve'
+        name='Fitted Voigt Curve'
     ))
     fig.add_trace(go.Scatter(
         x=x_original,
