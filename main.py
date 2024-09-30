@@ -96,6 +96,9 @@ for file in mpr_files:
                                                                         peak_value,
                                                                         peak_mid_voltage,
                                                                         config)
+
+        # Adjust baseline based on the last value of the filtered dQ/dV curve
+        y_fit = y_fit + charge_high_voltage_data['filtered_dQ/dV'].iloc[-1]
         ################################################################################################################
         ################################################################################################################
         ################################################################################################################
@@ -123,7 +126,7 @@ for file in mpr_files:
                                 y_fit,
                                 #dQdV_curve['mid_voltage'],
                                 charge_high_voltage_data['mid_voltage'],
-                                charge_high_voltage_data['filtered_dQ/dV']    )
+                                charge_high_voltage_data['filtered_dQ/dV'])
                                 #dQdV_curve['filtered_dQ/dV'])
     except Exception as e:
         logging.error(f"MAIN. An error occurred while processing file {file_name}: {e}")
@@ -141,8 +144,3 @@ summary_results_df = process_fitting_results(fitting_results, output_fitting_res
 
 # Log the end of the program
 logging.debug("MAIN. dQdV Analyser finished")
-
-
-
-
-
