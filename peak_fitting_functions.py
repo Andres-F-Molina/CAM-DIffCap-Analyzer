@@ -7,14 +7,9 @@ from scipy.special import voigt_profile
 
 # Define Voigt function for fitting
 def voigt(x, amplitude, center, sigma, gamma):
-    """
-    Voigt profile function.
-    amplitude: peak amplitude
-    center: center of the peak
-    sigma: standard deviation of the Gaussian part
-    gamma: gamma parameter of the Lorentzian part
-    """
-    return amplitude * voigt_profile(x - center, sigma, gamma)
+    vp = voigt_profile(x - center, sigma, gamma)
+    vp0 = voigt_profile(0, sigma, gamma)  # Peak value at center
+    return amplitude * vp / vp0  # Normalize so that peak value equals amplitude
 
 # Modify the objective function to include weights for Voigt
 def weighted_objective_function(params, x, y, weights):
