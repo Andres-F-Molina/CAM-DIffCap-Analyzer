@@ -26,7 +26,6 @@ except FileNotFoundError:
 #######################################################################################################################
 #######################################################################################################################
 # SET DIRECTORIES AND LOAD LOGGER CONFIGURATION #######################################################################
-#base_directory = '/Users/andresmolina/Documents/Projects/Algorithms_Echem_Data_Analysis/dQdV_Fitting'
 base_directory = config['directories']['base_directory']
 
 # Output directory plots
