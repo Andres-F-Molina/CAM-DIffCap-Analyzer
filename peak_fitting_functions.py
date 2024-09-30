@@ -11,8 +11,16 @@ def voigt(x, amplitude, center, sigma, gamma):
     vp0 = voigt_profile(0, sigma, gamma)  # Peak value at center
     return amplitude * vp / vp0  # Normalize so that peak value equals amplitude
 
+# Define Gaussian function for fitting
+def gaussian(x, amplitude, center, width):
+    return amplitude * np.exp(-((x - center) ** 2) / (2 * width ** 2))
+
+# Modify the objective function to include weights
+def weighted_gaussian_objective_function(params, x, y, weights):
+    return np.sum(weights * (gaussian(x, *params) - y) ** 2)
+
 # Modify the objective function to include weights for Voigt
-def weighted_objective_function(params, x, y, weights):
+def weighted_voigt_objective_function(params, x, y, weights):
     # Unpack params for the Voigt profile
     amplitude, center, sigma, gamma = params
     return np.sum(weights * (voigt(x, amplitude, center, sigma, gamma) - y) ** 2)
@@ -22,7 +30,7 @@ def normalize_sse(sse, y):
     return sse / np.sum(y ** 2)
 
 # Update the fitting process accordingly
-def fit_peak(dQdV_charge, peak_value, peak_mid_voltage, config):
+def fit_voigt_peak(dQdV_charge, peak_value, peak_mid_voltage, config):
     """
     Fits a Voigt profile to the detected peak.
     Returns fitted parameters, FWHM, area, and normalized SSE.
@@ -56,7 +64,7 @@ def fit_peak(dQdV_charge, peak_value, peak_mid_voltage, config):
 
     # Fit using the Voigt profile
     result = minimize(
-        weighted_objective_function,
+        weighted_voigt_objective_function,
         initial_guess,
         args=(
             dQdV_charge['mid_voltage'],
@@ -95,6 +103,81 @@ def fit_peak(dQdV_charge, peak_value, peak_mid_voltage, config):
     # Calculate FWHM and area for the Voigt profile
     fwhm = 0.5346 * 2 * parameters[3] + np.sqrt(0.2166 * (2 * parameters[3]) ** 2 + (2.355 * parameters[2]) ** 2)
     area = parameters[0] * (parameters[2] * np.sqrt(2 * np.pi) + 2 * parameters[3])
+
+    logging.debug(f"PEAK FITTING. Peak fitted successfully.")
+    return parameters, fwhm, area, normalized_SSE, x_fit, y_fit_optimized
+
+def fit_gaussian_peak(dQdV_charge, peak_value, peak_mid_voltage, config):
+    """
+    Fits a Gaussian to the detected peak.
+    Returns fitted parameters, FWHM, area, and normalized SSE.
+    """
+    logging.debug(f"PEAK FITTING. Fitting peak.")
+    # Initial guess
+    initial_guess = np.array([
+        peak_value * config['amplitude_initial_guess_percentage'],
+        peak_mid_voltage,
+        config['width_initial_guess']
+    ])
+
+    # Bounds
+    lower_bound_center = peak_mid_voltage * config['peak_center_lower_bound_percentage']
+    upper_bound_center = peak_mid_voltage * config['peak_center_upper_bound_percentage']
+
+    bounds = [
+        (None, np.max(dQdV_charge['filtered_dQ/dV'])),  # Amplitude
+        (lower_bound_center, upper_bound_center),     # Center
+        (config['width_lower_bound'], config['width_upper_bound'])  # Width
+    ]
+
+    # Weights
+    min_value = dQdV_charge['filtered_dQ/dV'].min()
+    peak_max_value = dQdV_charge['filtered_dQ/dV'].max()
+    cutoff_value = min_value + config['weight_cutoff_value'] * (peak_max_value - min_value)
+    weights = np.ones_like(dQdV_charge['filtered_dQ/dV'].values)
+    weights[dQdV_charge['filtered_dQ/dV'] < cutoff_value] = config['lower_weight_value']
+
+    # Fit
+    result = minimize(
+        weighted_gaussian_objective_function,
+        initial_guess,
+        args=(
+            dQdV_charge['mid_voltage'],
+            dQdV_charge['filtered_dQ/dV'] - dQdV_charge['filtered_dQ/dV'].iloc[-1],
+            weights
+        ),
+        method='Powell',
+        bounds=bounds,
+        options={
+            'maxiter': config['max_iter'],
+            'maxfev': config['max_eval'],
+            'xtol': config['xtol'],
+            'ftol': config['ftol'],
+            'disp': False
+        }
+    )
+
+    if not result.success:
+        logging.error(f"PEAK FITTING. Fit did not converge: {result.message}")
+        raise RuntimeError(f"Fit did not converge: {result.message}")
+
+    current_SSE = result.fun
+    normalized_SSE = normalize_sse(current_SSE, dQdV_charge['filtered_dQ/dV'].values)
+    if normalized_SSE > config['normalized_SSE_threshold']:
+        logging.error(f"PEAK FITTING. SSE too large {normalized_SSE}")
+        raise ValueError(f"SSE too large: {normalized_SSE}")
+
+    parameters = result.x
+    x_fit = np.linspace(
+        np.min(dQdV_charge['mid_voltage']),
+        np.max(dQdV_charge['mid_voltage']),
+        500
+    )
+    y_fit_optimized = gaussian(x_fit, *parameters)
+
+    # Calculate FWHM and area
+    fwhm = 2 * np.sqrt(2 * np.log(2)) * parameters[2]
+    area = parameters[0] * parameters[2] * np.sqrt(2 * np.pi)
 
     logging.debug(f"PEAK FITTING. Peak fitted successfully.")
     return parameters, fwhm, area, normalized_SSE, x_fit, y_fit_optimized

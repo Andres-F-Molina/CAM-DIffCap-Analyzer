@@ -55,6 +55,10 @@ mpr_files = filedialog.askopenfilenames(initialdir=base_directory)
 
 # Prompt the user to enter sample ID (QCL or LIMS number)
 sample_id = input("Please enter the sample ID (QCL number or another identifier): ")
+
+# Ask the user to select between Gaussian and Voigt peak fitting
+peak_fitting_method = input("Please enter the peak fitting method (Gaussian 'G' or Voigt 'V':")
+
 #######################################################################################################################
 #######################################################################################################################
 #######################################################################################################################
@@ -92,10 +96,19 @@ for file in mpr_files:
         ################################################################################################################
         ################################################################################################################
         # Fit peak at high voltages
-        parameters, fwhm, area, normalized_SSE, x_fit, y_fit = fit_peak(charge_high_voltage_data,
-                                                                        peak_value,
-                                                                        peak_mid_voltage,
-                                                                        config)
+        if peak_fitting_method.lower() == 'v':
+            parameters, fwhm, area, normalized_SSE, x_fit, y_fit = fit_voigt_peak(charge_high_voltage_data,
+                                                                                peak_value,
+                                                                                peak_mid_voltage,
+                                                                                config)
+        elif peak_fitting_method.lower() == 'g':
+            parameters, fwhm, area, normalized_SSE, x_fit, y_fit = fit_gaussian_peak(charge_high_voltage_data,
+                                                                                    peak_value,
+                                                                                    peak_mid_voltage,
+                                                                                    config)
+        else:
+            logging.error(f"MAIN. Invalid peak fitting method: {peak_fitting_method}.")
+            continue
 
         # Adjust baseline based on the last value of the filtered dQ/dV curve
         y_fit = y_fit + charge_high_voltage_data['filtered_dQ/dV'].iloc[-1]
@@ -124,10 +137,8 @@ for file in mpr_files:
         plot_dqdv_peak_fitting(file_stem,
                                 x_fit,
                                 y_fit,
-                                #dQdV_curve['mid_voltage'],
                                 charge_high_voltage_data['mid_voltage'],
                                 charge_high_voltage_data['filtered_dQ/dV'])
-                                #dQdV_curve['filtered_dQ/dV'])
     except Exception as e:
         logging.error(f"MAIN. An error occurred while processing file {file_name}: {e}")
         continue  # Skip to the next file
