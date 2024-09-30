@@ -108,7 +108,7 @@ def find_peaks(dQdV_charge):
 
     # Detect where the sign goes from +1 to -1 (indicating a peak)
     peaks = np.where((sign_change[:-1] > 0) & (sign_change[1:] < 0))[0]
-    peak_values = dQdV_charge['filtered_dQ/dV'].iloc[peaks].values
+    #peak_values = dQdV_charge['filtered_dQ/dV'].iloc[peaks].values
 
     # Find the maximum value of 'filtered_dQ/dV' and its index
     max_peak_index = dQdV_charge['filtered_dQ/dV'].idxmax()
@@ -122,12 +122,7 @@ def process_fitting_results(fitting_results_dict, export_dir, sample_id):
     try:
         logging.debug(f"PEAK FITTING. Processing fitting results.")
 
-        # Ask the user if they want to summarize the results
-        #summarize = input("Do you want to summarize the fitting results? (Y/N): ").strip().upper()
-        #if summarize != 'Y':
-        #    print("Summary skipped.")
-        #    return
-
+        # Create a list to store the summary results
         summary_results = []
 
         for doe, results in fitting_results_dict.items():
