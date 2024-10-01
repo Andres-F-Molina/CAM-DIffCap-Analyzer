@@ -30,6 +30,9 @@ amplitude_initial_guess_percentage: 0.99
 # 2. The width of the peak is 0.001 V.  
 width_initial_guess: 0.001
 
+# 3. Parameter for voigt gamma value
+gamma_initial_guess: 0.1
+
 # Bounds for the peak center relative to the initial guess. The peak center will be fitted between 99% and 101% of the initial guess.
 peak_center_lower_bound_percentage: 0.99
 peak_center_upper_bound_percentage: 1.01
@@ -38,8 +41,13 @@ peak_center_upper_bound_percentage: 1.01
 # The higher the value, the more weight is given to the data below the cutoff value.
 lower_weight_value : 0.1
 
+# Bounds for gamma value
+gamma_lower_bound: 0.01
+gamma_upper_bound: 1.0
+
 # Parameters for the fitting algorithm
 max_iter: 20000
 max_eval: 10000
 xtol: 1.0e-20
 ftol: 1.0e-20
+
