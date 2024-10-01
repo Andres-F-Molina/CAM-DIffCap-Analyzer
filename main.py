@@ -138,7 +138,8 @@ for file in mpr_files:
                                 x_fit,
                                 y_fit,
                                 charge_high_voltage_data['mid_voltage'],
-                                charge_high_voltage_data['filtered_dQ/dV'])
+                                charge_high_voltage_data['filtered_dQ/dV'],
+                                peak_fitting_method)
     except Exception as e:
         logging.error(f"MAIN. An error occurred while processing file {file_name}: {e}")
         continue  # Skip to the next file
