@@ -450,11 +450,8 @@ def process_fitting_results(fitting_results_dict, export_dir, sample_id):
         """
     try:
         logging.debug(f"PEAK FITTING. Processing fitting results.")
-
-<<<<<<< HEAD
-=======
-
->>>>>>> pseudo-voigt-fitting
+        
+        pseudo-voigt-fitting
         summary_results = []
 
         for doe, results in fitting_results_dict.items():
