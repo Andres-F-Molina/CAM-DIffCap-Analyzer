@@ -8,5 +8,6 @@ The program takes directly the raw *.mpr files from GPCL (Galvanostatic cycling 
 ## Installation
 1. Clone the repo.
 2. Specify all the directories in the file 'directory_config_template.yaml'.
-3. Install all the packages from the requirements.txt file
-4. Run the main.
+3. Change the name to 'directory_config.yaml'.
+4. Install all the packages from the requirements.txt file
+5. Run the main.
